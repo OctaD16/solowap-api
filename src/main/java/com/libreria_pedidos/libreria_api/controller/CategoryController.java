@@ -1,5 +1,6 @@
 package com.libreria_pedidos.libreria_api.controller;
 
+import com.libreria_pedidos.libreria_api.dto.CategoryRequestDto;
 import com.libreria_pedidos.libreria_api.dto.CategoryResponseDto;
 import com.libreria_pedidos.libreria_api.model.Category;
 import com.libreria_pedidos.libreria_api.serviceJPA.ICategoryService;
@@ -54,9 +55,22 @@ public class CategoryController {
 
     //METODO POST
     @PostMapping
-    public ResponseEntity<DtoApiResponse<Category>> guardarCategoria(@RequestBody Category category) {
-        Category categoriaGuardada = categoryService.guardar(category);
-        DtoApiResponse<Category> response = new DtoApiResponse<>(201, "Categoria guardada", categoriaGuardada);
+    public ResponseEntity<DtoApiResponse<CategoryResponseDto>> guardarCategoria(@RequestBody CategoryRequestDto requestDto) {
+
+        Category nCate = new Category();
+        nCate.setName(requestDto.getName());
+        nCate.setDescription(requestDto.getDescription());
+        nCate.setStatus("activo");
+
+        Category categoriaGuardada = categoryService.guardar(nCate);
+
+        CategoryResponseDto dto = new CategoryResponseDto();
+
+        dto.setId(categoriaGuardada.getId());
+        dto.setName(categoriaGuardada.getName());
+        dto.setDescription(categoriaGuardada.getDescription());
+
+        DtoApiResponse<CategoryResponseDto> response = new DtoApiResponse<>(201, "Categoría creada", dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

@@ -22,15 +22,23 @@ public class ProductController {
 
     //METODO GET
     @GetMapping
-    public ResponseEntity<DtoApiResponse <List<ProductResponseDto|>>>  buscarTodosLosProductos() {
+    public ResponseEntity<DtoApiResponse <List<ProductResponseDto>>>  buscarTodosLosProductos() {
         List<Product> listaDeProductos = productService.buscarTodos();
 
+        List<ProductResponseDto> listaDeDtos = new ArrayList<>();
 
-        for(){
-
+        for(Product product : listaDeProductos){
+            ProductResponseDto dto = new ProductResponseDto();
+            dto.setId(product.getId());
+            dto.setName(product.getName());
+            dto.setPrice(product.getPrice());
+            dto.setStock(product.getStock());
+            dto.setImage(product.getImage());
+            dto.setStatus(product.getStatus());
+            listaDeDtos.add(dto);
         }
 
-        DtoApiResponse<List<Product>> response = new DtoApiResponse<>(200, "Productos encontrados", listaDeProductos);
+        DtoApiResponse<List<ProductResponseDto>> response = new DtoApiResponse<>(200, "Productos encontrados", listaDeDtos);
         return ResponseEntity.ok(response);
     }
 
