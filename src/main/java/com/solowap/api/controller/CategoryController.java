@@ -1,0 +1,91 @@
+package com.solowap.api.controller;
+
+import com.solowap.api.dto.CategoryRequestDto;
+import com.solowap.api.dto.CategoryResponseDto;
+import com.solowap.api.model.Category;
+import com.solowap.api.serviceJPA.ICategoryService;
+import com.solowap.api.util.DtoApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/categorias")
+public class CategoryController {
+
+    @Autowired
+    private ICategoryService categoryService;
+
+    //METODO GET
+    //All
+    @GetMapping
+    public ResponseEntity<DtoApiResponse<List<CategoryResponseDto>>> buscarCategorias() {
+        List<Category> listaDeCategorias = categoryService.buscarTodos();
+
+        List<CategoryResponseDto> listDto = new ArrayList<>();
+
+        for (Category categoria : listaDeCategorias){
+            CategoryResponseDto dto = new CategoryResponseDto();
+            dto.setId(categoria.getId());
+            dto.setName(categoria.getName());
+            dto.setDescription(categoria.getDescription());
+
+            listDto.add(dto);
+        }
+        DtoApiResponse<List<CategoryResponseDto>> response = new DtoApiResponse<>(200, "Categorias encontradas", listDto);
+        return ResponseEntity.ok(response);
+        }
+    //By id
+    @GetMapping("/{id}")
+    public ResponseEntity<DtoApiResponse<CategoryResponseDto>> buscarPorId(@PathVariable Long id) {
+        Category category = categoryService.buscarPorId(id);
+
+        CategoryResponseDto dto = new CategoryResponseDto();
+        dto.setId(category.getId());
+        dto.setName(category.getName());
+        dto.setDescription(category.getDescription());
+
+        DtoApiResponse<CategoryResponseDto> response = new DtoApiResponse<>(200, "Categoria encontrada", dto);
+        return ResponseEntity.ok(response);
+    }
+
+    //METODO POST
+    @PostMapping
+    public ResponseEntity<DtoApiResponse<CategoryResponseDto>> guardarCategoria(@RequestBody CategoryRequestDto requestDto) {
+
+        Category nCate = new Category();
+        nCate.setName(requestDto.getName());
+        nCate.setDescription(requestDto.getDescription());
+        nCate.setStatus("activo");
+
+        Category categoriaGuardada = categoryService.guardar(nCate);
+
+        CategoryResponseDto dto = new CategoryResponseDto();
+
+        dto.setId(categoriaGuardada.getId());
+        dto.setName(categoriaGuardada.getName());
+        dto.setDescription(categoriaGuardada.getDescription());
+
+        DtoApiResponse<CategoryResponseDto> response = new DtoApiResponse<>(201, "CategorÃ­a creada", dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    //METODO PUT
+    @PutMapping("/{id}")
+    public ResponseEntity<DtoApiResponse<Category>> actualizarCategoria(@RequestBody Category category, @PathVariable Long id) {
+    Category categoriaActualizada = categoryService.actualizar(id, category);
+    DtoApiResponse<Category> response = new DtoApiResponse<>(200, "Categoria actualizada", categoriaActualizada);
+    return ResponseEntity.ok(response);
+    }
+
+    //METODO DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id) {
+    categoryService.eliminar(id);
+    return ResponseEntity.noContent().build();
+    }
+}
